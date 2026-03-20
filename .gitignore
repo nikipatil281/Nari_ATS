@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env
+backend/venv/
+
+# LangGraph
+langgraph_checkpoints.db
+langgraph_checkpoints.db-shm
+langgraph_checkpoints.db-wal
+
+# Node
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
