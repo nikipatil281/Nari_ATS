@@ -8,6 +8,12 @@ env/
 .env
 backend/venv/
 
+# Data & Samples
+resume.docx
+*.pdf
+*.docx
+*.doc
+
 # LangGraph
 langgraph_checkpoints.db
 langgraph_checkpoints.db-shm
