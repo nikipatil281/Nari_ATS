@@ -9,7 +9,7 @@ const flagDefinitions = {
   "Technical Footprint Mismatch": "A significant gap between the technologies used in the candidate's actual projects versus the skills prioritized on their profile."
 };
 
-const CollapsibleSection = ({ title, icon: Icon, explanation, children, defaultOpen = false, alert = false }) => {
+const CollapsibleSection = ({ title, icon: Icon, explanation, children, agentName, defaultOpen = false, alert = false }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
     <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-sm border ${alert ? 'border-rose-200 dark:border-rose-900/50' : 'border-slate-200 dark:border-slate-700'} overflow-hidden mb-6 transition-colors duration-300`}>
@@ -22,7 +22,14 @@ const CollapsibleSection = ({ title, icon: Icon, explanation, children, defaultO
             <Icon className="w-5 h-5" />
           </div>
           <div>
-            <h3 className={`text-lg font-bold transition-colors ${alert ? 'text-rose-900 dark:text-rose-200' : 'text-slate-800 dark:text-slate-100'}`}>{title}</h3>
+            <div className="flex items-center space-x-3">
+              <h3 className={`text-lg font-bold transition-colors ${alert ? 'text-rose-900 dark:text-rose-200' : 'text-slate-800 dark:text-slate-100'}`}>{title}</h3>
+              {agentName && (
+                <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-[10px] font-black uppercase tracking-tighter text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600 transition-colors">
+                  Verified by {agentName}
+                </span>
+              )}
+            </div>
             {explanation && <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 transition-colors">{explanation}</p>}
           </div>
         </div>
@@ -158,10 +165,9 @@ export default function Results() {
                       <Zap className="w-7 h-7 mr-3 text-indigo-500" /> Unified Candidate Reasoning Report
                     </h2>
                     
-                    {data.final_json.matching_score !== undefined && (
-                      <div className="flex items-center space-x-4 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 transition-colors">
+                    <div className="flex items-center space-x-4 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 transition-colors">
                         <div className="text-right">
-                          <p className="text-[10px] uppercase tracking-widest font-black text-slate-400 dark:text-slate-500">Matching Score</p>
+                          <p className="text-[10px] uppercase tracking-widest font-black text-slate-400 dark:text-slate-500">Agent Vox Synthesis</p>
                           <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-0.5">
                             {data.final_json.matching_score >= 80 ? 'Exceptional Match' : 
                              data.final_json.matching_score >= 50 ? 'Potential Match' : 'Gap Detected'}
@@ -173,8 +179,7 @@ export default function Results() {
                             'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800'}`}>
                           {data.final_json.matching_score}%
                         </div>
-                      </div>
-                    )}
+                    </div>
                   </div>
 
                   <div className="prose prose-slate max-w-none text-slate-700 dark:text-slate-300 leading-relaxed font-medium space-y-4 transition-colors">
@@ -191,6 +196,7 @@ export default function Results() {
                 <CollapsibleSection
                   title="Source Provenance Links"
                   icon={Globe}
+                  agentName="Ingest Agent & Web Researcher"
                   explanation="Direct links to the exact GitHub repositories, LinkedIn profile, and Tavily web data gathered as evidence."
                   defaultOpen={true}
                 >
@@ -224,6 +230,7 @@ export default function Results() {
                 <CollapsibleSection
                   title="Auditor Findings (Bias & Evidence Check)"
                   icon={hasBias ? ShieldAlert : ShieldCheck}
+                  agentName="Adversarial Auditor"
                   explanation="The Adversarial Auditor's red-team analysis isolating hallucinated claims or elite prestige bias."
                   defaultOpen={hasBias}
                   alert={hasBias}
@@ -264,6 +271,7 @@ export default function Results() {
               <CollapsibleSection
                 title="Cross-Verified Skills Inventory"
                 icon={Cpu}
+                agentName="Hybrid Reasoning Agent"
                 explanation="Hybrid Reasoning matrix combining resume claims vs GitHub code footprints."
                 defaultOpen={true}
               >
@@ -324,6 +332,7 @@ export default function Results() {
                 <CollapsibleSection
                   title="Career Trajectory Analysis"
                   icon={Activity}
+                  agentName="Trajectory Agent"
                   explanation="Analyzes Experience Progression scaling over time rather than flat skill logs."
                   defaultOpen={false}
                 >
@@ -341,6 +350,7 @@ export default function Results() {
                 <CollapsibleSection
                   title="Success & Learning Velocity"
                   icon={Zap}
+                  agentName="Success Velocity Agent"
                   explanation="Evaluates 'created_at' timestamps of GitHub repos against codebase complexity to deduce learning speed."
                   defaultOpen={false}
                 >
@@ -358,6 +368,7 @@ export default function Results() {
                 <CollapsibleSection
                   title="Agent Vox: Suggested Technical Realities"
                   icon={BookOpen}
+                  agentName="Agent Vox"
                   explanation="Dynamically generated technical interview questions aimed strictly at probing the discovered Ghost Skills and Evidence Gaps."
                   defaultOpen={false}
                 >
