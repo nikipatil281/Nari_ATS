@@ -80,18 +80,36 @@ def search_github(name: str, email: str = "", github_handle: str = "") -> dict:
         # Fetch repos for the user to determine true language footprint
         repos_url = user.get("repos_url", "")
         if repos_url:
-            repo_resp = requests.get(repos_url + "?per_page=10&sort=updated", headers=headers)
+            repo_resp = requests.get(repos_url + "?per_page=20&sort=updated", headers=headers)
             if repo_resp.status_code == 200:
                 repos = repo_resp.json()
-                for repo in repos:
-                    user_data["repos"].append({
+                import base64
+                for i, repo in enumerate(repos):
+                    repo_info = {
                         "name": repo.get("name", ""),
                         "html_url": repo.get("html_url", ""),
                         "description": repo.get("description", ""),
+                        "topics": repo.get("topics", []),
                         "language": repo.get("language", ""),
                         "created_at": repo.get("created_at", ""),
-                        "updated_at": repo.get("updated_at", "")
-                    })
+                        "updated_at": repo.get("updated_at", ""),
+                        "readme_snippet": ""
+                    }
+                    
+                    # Fetch README for the top 5 most recently updated repos to keep it efficient
+                    if i < 5:
+                        repo_full_name = repo.get("full_name")
+                        if repo_full_name:
+                            readme_resp = requests.get(f"https://api.github.com/repos/{repo_full_name}/readme", headers=headers)
+                            if readme_resp.status_code == 200:
+                                try:
+                                    readme_data = readme_resp.json()
+                                    content = base64.b64decode(readme_data['content']).decode('utf-8', errors='ignore')
+                                    repo_info["readme_snippet"] = content[:800] # Take first 800 chars
+                                except Exception as e:
+                                    print(f"Error decoding README for {repo_full_name}: {e}")
+                    
+                    user_data["repos"].append(repo_info)
         results["users_found"].append(user_data)
         
     # Fallback to DDG if absolutely nothing found

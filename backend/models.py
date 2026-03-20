@@ -22,6 +22,7 @@ class FinalJson(TypedDict):
     summary: str
     provenance_links: List[str]
     recommended_questions: List[str]
+    matching_score: int
 
 class GraphState(TypedDict):
     task_id: str

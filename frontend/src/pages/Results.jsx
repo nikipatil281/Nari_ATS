@@ -152,9 +152,31 @@ export default function Results() {
               {status === 'DONE' && data.final_json?.summary && (
                 <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 border border-indigo-200 dark:border-indigo-900 shadow-lg relative overflow-hidden mb-8 transition-colors duration-300">
                   <div className="absolute top-0 left-0 w-2 h-full bg-indigo-500"></div>
-                  <h2 className="text-2xl font-black text-slate-800 dark:text-slate-100 mb-5 flex items-center tracking-tight transition-colors">
-                    <Zap className="w-7 h-7 mr-3 text-indigo-500" /> Unified Candidate Reasoning Report
-                  </h2>
+                  
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                    <h2 className="text-2xl font-black text-slate-800 dark:text-slate-100 flex items-center tracking-tight transition-colors">
+                      <Zap className="w-7 h-7 mr-3 text-indigo-500" /> Unified Candidate Reasoning Report
+                    </h2>
+                    
+                    {data.final_json.matching_score !== undefined && (
+                      <div className="flex items-center space-x-4 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 transition-colors">
+                        <div className="text-right">
+                          <p className="text-[10px] uppercase tracking-widest font-black text-slate-400 dark:text-slate-500">Matching Score</p>
+                          <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-0.5">
+                            {data.final_json.matching_score >= 80 ? 'Exceptional Match' : 
+                             data.final_json.matching_score >= 50 ? 'Potential Match' : 'Gap Detected'}
+                          </p>
+                        </div>
+                        <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-xl font-black shadow-sm border-2 transition-colors
+                          ${data.final_json.matching_score >= 80 ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' : 
+                            data.final_json.matching_score >= 50 ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800' : 
+                            'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800'}`}>
+                          {data.final_json.matching_score}%
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="prose prose-slate max-w-none text-slate-700 dark:text-slate-300 leading-relaxed font-medium space-y-4 transition-colors">
                     {data.final_json.summary.split('\\n').map((para, i) => {
                       const cleaned = para.trim().replace(/\\*\\*/g, '');

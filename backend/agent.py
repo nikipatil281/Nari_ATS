@@ -131,14 +131,15 @@ def reasoning_node(state: GraphState):
         
     prompt = ChatPromptTemplate.from_template(
         "Compare Resume skills against GitHub code footprints and the Job Description.\\n"
-        "Identify 'Ghost Skills' (present heavily in GitHub repo languages/descriptions but missing from Resume).\\n"
+        "Identify 'Ghost Skills' (present heavily in GitHub repo languages/descriptions/READMEs but missing from Resume).\\n"
         "Identify 'Skills Discrepancy' (claimed on resume but GitHub shows massive evidence of opposite languages).\\n"
         "If GitHub Data is empty or contains no users, DO NOT hallucinate evidence. Mark skills as 'Unverified - No GitHub Data'.\\n"
         "If substantial evidence for a skill is found in the 'Web Evidence Findings' (via Tavily search), you MUST mark its status explicitly as 'Web Verified'.\\n"
         "CRITICAL: Be extremely strict about 'in_resume'. If the skill is not explicitly mentioned or clearly implied in the Resume text, you MUST set 'in_resume' to false.\\n"
+        "DEEP GITHUB SCAN: Analyze the 'topics' and 'readme_snippet' for each repository. If you find technical keywords (like 'Deep Learning', 'PyTorch', etc.) in the README or topics even if not in the description, you MUST use that as concrete evidence.\\n"
         "Hiring Manager Notes: {notes}\\n"
         "{audit_feedback}"
-        "Resume: {resume}\\nGitHub Data (Languages & Repos): {github}\\nWeb Evidence Findings: {web_evidence}\\nJD: {jd}\\n\\n"
+        "Resume: {resume}\\nGitHub Data (Languages, Topics & README snippets): {github}\\nWeb Evidence Findings: {web_evidence}\\nJD: {jd}\\n\\n"
         "Output ONLY a JSON array of skill objects, each with:\\n"
         "- 'skill' (str)\\n"
         "- 'in_jd' (bool)\\n"
@@ -211,7 +212,8 @@ def reporting_node(state: GraphState):
     llm = get_llm()
     prompt = ChatPromptTemplate.from_template(
         "Synthesize the state into a final, comprehensive structured JSON.\\n"
-        "Must include exactly these keys: 'summary' (str) and 'recommended_questions' (list of strings).\\n"
+        "Must include exactly these keys: 'summary' (str), 'matching_score' (int, 0-100), and 'recommended_questions' (list of strings).\\n"
+        "MATCHING SCORE (0-100): Calculate a single integer score representing how well this candidate matches the Job Description. High scores (80+) mean they are a stellar technical and trajectory match. Mid scores (50-79) mean they have some gaps or need verification. Low scores (<50) indicate significant mismatches or evidence gaps.\\n"
         "AGENT VOX (Technical Interviewer): Based on the 'Ghost Skills', 'Skills Discrepancies', and 'Evidence Gaps' found by the Auditor, directly generate 3-5 highly-tailored, deep-dive technical interview questions to ask this exact candidate in the next round. These should test the exact boundaries of their verified skills or probe their gaps. Put these in 'recommended_questions'.\\n"
         "CRITICAL FOR SUMMARY: The 'summary' must be a highly candidate-specific Executive Overview of who they are, their core technical stack, and their highest-impact achievements. Seamlessly weave in the novelty of this ATS by explaining how you verified their 'Ghost Skills' via GitHub, utilized Autonomous Web Verification via Tavily, and audited them for 'Prestige Bias' and 'Evidence Gaps'. The focus MUST remain on the candidate's actual qualifications while gracefully demonstrating the rigors of our multi-agent verification. Break into 2-3 highly readable paragraphs.\\n"
         "STRICT JSON RULE: If you use line breaks in your summary string, you MUST escape them as \\\\n. The output must be perfectly valid JSON.\\n"
@@ -224,12 +226,13 @@ def reporting_node(state: GraphState):
         "trajectory": state.get("career_trajectory"),
         "velocity": state.get("learning_velocity"),
         "skills": state.get("skills_report"),
-        "audit": state.get("audit_flags")
+        "audit": state.get("audit_flags"),
+        "jd": state.get("job_description")
     }
     response = llm.invoke(prompt.format_messages(state=json.dumps(safe_state)[:5000]))
     final_json = _clean_json_output(response.content)
     if not isinstance(final_json, dict):
-        final_json = {"summary": "Error generating report", "recommended_questions": []}
+        final_json = {"summary": "Error generating report", "recommended_questions": [], "matching_score": 0}
         
     # Manually inject exact provenance links to guarantee zero hallucination
     provenance_links = []
