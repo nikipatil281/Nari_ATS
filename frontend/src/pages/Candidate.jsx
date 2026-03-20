@@ -17,8 +17,7 @@ export default function Candidate() {
 
   const fetchJobs = async () => {
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-      const res = await axios.get(`${API_BASE_URL}/api/jobs`);
+      const res = await axios.get('http://localhost:8000/api/jobs');
       setJobs(res.data.jobs || []);
     } catch (err) {
       console.error(err);
@@ -35,8 +34,7 @@ export default function Candidate() {
     formData.append('file', file);
     
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-      const res = await axios.post(`${API_BASE_URL}/api/upload-resume/${selectedJob.job_id}`, formData);
+      const res = await axios.post(`http://localhost:8000/api/upload-resume/${selectedJob.job_id}`, formData);
       navigate(`/results/${res.data.task_id}`);
     } catch (err) {
       console.error(err);

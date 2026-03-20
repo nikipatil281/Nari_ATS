@@ -50,8 +50,7 @@ export default function Results() {
     let intervalId;
     const pollResults = async () => {
       try {
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-        const res = await axios.get(`${API_BASE_URL}/api/results/${taskId}`);
+        const res = await axios.get(`http://localhost:8000/api/results/${taskId}`);
         if (res.data.status === 'DONE') {
           setData(res.data.result);
           setStatus('DONE');
